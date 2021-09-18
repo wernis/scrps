@@ -1,0 +1,16 @@
+/package-lock.json
+
+/dist
+/.rpt2_cache
+/tsc-out
+/node_modules
+/_book
+/build/*
+
+/typings
+
+screeps.json
+
+.DS_Store
+.AppleDouble
+.LSOverride
