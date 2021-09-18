@@ -11,4 +11,5 @@ const memoryHelper = {
     }
 };
 
+// export
 export { memoryHelper };

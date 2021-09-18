@@ -5,7 +5,7 @@ import { creepManager } from "manager/creepManager";
 // global declerations
 declare global {
     interface Memory {
-        version: "0.0.1"
+        version: string
     }
     interface CreepMemory {
         role: string;
@@ -14,12 +14,16 @@ declare global {
     }
 }
 
+Memory.version = "0.0.1";
+
 // main loop
 export const loop = () => {
-    console.log(`Current game tick is ${Game.time}`);
+    console.log(`Version: ${Memory.version}`);
+    console.log(`Game Tick: ${Game.time}`);
 
     // run creep manager
     creepManager.run();
+    creepManager.spawn();
 
     // clear dead creeps' memory
     memoryHelper.clearDeadCreepMemory();

@@ -1,7 +1,6 @@
 // import worker creeps
-import { basicCreep } from "worker/basic";
-import { minerCreep } from "worker/miner";
-import { repairerCreep } from "worker/repairer";
+import { builderCreep } from "worker/builder";
+import { harvesterCreep } from "worker/harvester";
 import { upgraderCreep } from "worker/upgrader";
 
 // define creepManager
@@ -10,25 +9,57 @@ const creepManager = {
         for (let name in Game.creeps) {
             const creep = Game.creeps[name];
             switch (creep.memory.role) {
-                case "basic":
-                    basicCreep.run(creep);
+                case "harvester":
+                    harvesterCreep.run(creep);
                     break;
                 case "upgrader":
                     upgraderCreep.run(creep);
                     break;
-                case "miner":
-                    minerCreep.run(creep);
-                    break;
-                case "repairer":
-                    repairerCreep.run(creep);
-                    break;
-                case "upgrader":
-                    upgraderCreep.run(creep);
+                case "builder":
+                    builderCreep.run(creep);
                     break;
                 default:
                     console.log(`Creep [name:${name}] role incorrect: ${creep.memory.role}`)
-                    break;;
+                    break;
             }
+        }
+    },
+    spawn: function () {
+        let harvesterCount = 0;
+        let builderCount = 0;
+        let upgraderCount = 0;
+        let unknownCount = 0;
+
+        const harvesterMax = 1;
+        const builderMax = 1;
+        const upgraderMax = 1;
+
+        for (let name in Game.creeps) {
+            const creep = Game.creeps[name];
+            switch (creep.memory.role) {
+                case "harvester":
+                    harvesterCount++;
+                    break;
+                case "upgrader":
+                    upgraderCount++;
+                    break;
+                case "builder":
+                    builderCount++;
+                    break;
+                default:
+                    unknownCount++;
+                    break;
+            }
+        }
+
+        if (harvesterCount < harvesterMax) {
+            Game.spawns["spawn001"].spawnCreep([WORK, WORK, CARRY, MOVE], `harvester-${Game.time}`, { memory: { role: "harvester", room: "", working: false }});
+        }
+        if (builderCount < builderMax) {
+            Game.spawns["spawn001"].spawnCreep([WORK, WORK, CARRY, MOVE], `builder-${Game.time}`, { memory: { role: "builder", room: "", working: false }});
+        }
+        if (upgraderCount < upgraderMax) {
+            Game.spawns["spawn001"].spawnCreep([WORK, WORK, CARRY, MOVE], `upgrader-${Game.time}`, { memory: { role: "upgrader", room: "", working: false }});
         }
     }
 };
