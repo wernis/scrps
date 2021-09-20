@@ -1,7 +1,9 @@
 // import worker creeps
-import { builderCreep } from "worker/builder";
-import { harvesterCreep } from "worker/harvester";
-import { upgraderCreep } from "worker/upgrader";
+import { builderCreep } from "worker/tutorial/builder";
+// import { harvesterCreep } from "worker/tutorial/harvester";
+import { upgraderCreep } from "worker/tutorial/upgrader";
+
+import { harvesterCreep } from "worker/advanced/harvester";
 
 // define creepManager
 const creepManager = {
@@ -30,8 +32,8 @@ const creepManager = {
         let upgraderCount = 0;
         let unknownCount = 0;
 
-        const harvesterMax = 1;
-        const builderMax = 1;
+        const harvesterMax = 3;
+        const builderMax = 2;
         const upgraderMax = 1;
 
         for (let name in Game.creeps) {

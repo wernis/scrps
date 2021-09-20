@@ -1,0 +1,2 @@
+# SCRPS
+A screeps AI.  
