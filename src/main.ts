@@ -5,7 +5,9 @@ import { creepManager } from "manager/creepManager";
 // global declerations
 declare global {
     interface Memory {
-        version: string
+        version: string;
+        wallHits: number;
+        rampartHits: number;
     }
     interface CreepMemory {
         role: string;
@@ -15,6 +17,8 @@ declare global {
 }
 
 Memory.version = "0.0.1";
+Memory.wallHits = 1000;
+Memory.rampartHits = 1000;
 
 // main loop
 export const loop = () => {
