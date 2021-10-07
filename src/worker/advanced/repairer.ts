@@ -4,17 +4,18 @@ const repairerCreep = {
         let working = creep.memory.working;
         if (working) {
             if (creep.store.getFreeCapacity() > 0) {
-                let harvestLocations = creep.room.find(FIND_SOURCES);
-                let firstLocation = harvestLocations[0];
-                let harvestResult = creep.harvest(firstLocation);
-                switch (harvestResult) {
-                    case ERR_NOT_IN_RANGE:
-                        creep.moveTo(firstLocation);
-                        break;
-                    case OK:
-                        // do something if all went OK
-                        break;
-                }
+                let withdrawLocation = this.getWithdrawLocation(creep);
+                if (withdrawLocation) {
+                    let widthdrawResult = creep.withdraw(withdrawLocation, RESOURCE_ENERGY);
+                    switch (widthdrawResult) {
+                        case ERR_NOT_IN_RANGE:
+                            creep.moveTo(withdrawLocation);
+                            break;
+                        case OK:
+                            // do something if all went OK
+                            break;
+                    }
+                }                
             }
             else {
                 creep.memory.working = false;
@@ -22,25 +23,11 @@ const repairerCreep = {
         }
         else {
             if (creep.store.getUsedCapacity(RESOURCE_ENERGY) > 0) {
-                let repairLocations: any = this.getRampartsToRepair(creep);
-                if (! (repairLocations.length > 0)) {
-                    repairLocations = this.getRoadsToRepair(creep);
-                }
-                if (! (repairLocations.length > 0)) {
-                    Memory.rampartHits += 500;
-                    repairLocations = this.getRampartsToRepair(creep);
-                }
-                if (! (repairLocations.length > 0)) {
-                    Memory.wallHits += 500;
-                    repairLocations = this.getRoadsToRepair(creep);
-                }
-                if (! (repairLocations.length > 0)) {
-                    console.log("NO REPAIR LOCATIONS")
-                }
-                let repairResult = creep.repair(repairLocations[0]);
+                let repairLocation: any = this.getRepairLocation(creep);
+                let repairResult = creep.repair(repairLocation[0]);
                 switch (repairResult) {
                     case ERR_NOT_IN_RANGE:
-                        creep.moveTo(repairLocations[0]);
+                        creep.moveTo(repairLocation[0]);
                         break;
                     case OK:
                         // do something if all went OK
@@ -55,39 +42,118 @@ const repairerCreep = {
 
     getRepairLocation: function(creep: Creep) {
         let repairLocation: any;
-        repairLocation = 
+        repairLocation =
+            this.getContainersToRepair(creep) ||
+            this.getTowersToRepair(creep) ||
+            this.getRoadsToRepair(creep) ||
             this.getRampartsToRepair(creep) ||
-            this.getRoadsToRepair(creep);
+            this.getWallsToRepair(creep);
         if (! repairLocation) {
             console.log("no repair location.");
             return [];
         }
         return repairLocation;
     },
-
+    getTowersToRepair: function(creep: Creep) {
+        const allTowers = creep.room.find(FIND_MY_STRUCTURES, {
+            filter: function(structure) {
+                return (
+                    structure.structureType === STRUCTURE_TOWER &&
+                    structure.hits <= (structure.hitsMax * 0.95)
+                )
+            }
+        });
+        if (allTowers.length) {
+            return allTowers;
+        }
+        return null;
+    },
+    getContainersToRepair: function (creep: Creep) {
+        const allContainers = creep.room.find(FIND_STRUCTURES, {
+            filter: function(structure) {
+                return (
+                    (structure.structureType === STRUCTURE_CONTAINER) &&
+                    (structure.hits < (structure.hitsMax * 0.9))
+                )
+            }
+        });
+        if (allContainers.length) {
+            return allContainers;
+        }
+        return null;
+    },
+    getWithdrawLocation: function(creep: Creep) {
+        let withdrawLocation = creep.room.find(FIND_MY_STRUCTURES,{
+            filter: function (structure) {
+                return (
+                    structure.structureType === STRUCTURE_STORAGE &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 5000
+                )
+            }
+        });
+        if (withdrawLocation) {
+            return withdrawLocation[0];
+        };
+        withdrawLocation = creep.room.find(FIND_STRUCTURES,{
+            filter: function (structure) {
+                return (
+                    structure.structureType === STRUCTURE_CONTAINER &&
+                    structure.store.getUsedCapacity(RESOURCE_ENERGY) > 1000
+                )
+            }
+        });
+        if (withdrawLocation) {
+            return withdrawLocation[0];
+        };
+        return null;
+    },
     getRampartsToRepair: function(creep: Creep) {
         const allRamparts = creep.room.find(FIND_MY_STRUCTURES, {
             filter: function(structure) {
                 return (
                     structure.hits < structure.hitsMax &&
                     structure.structureType === STRUCTURE_RAMPART &&
-                    structure.hits < Memory.rampartHits
+                    structure.hits < Memory.rapartAndWallHits
                 )
             }
         });
-        return allRamparts;
+        if (allRamparts.length) {
+            return allRamparts;
+        }
+        return null;
+    },
+    getWallsToRepair: function(creep: Creep) {
+        const allWalls = creep.room.find(FIND_STRUCTURES, {
+            filter: function(structure) {
+                return (
+                    structure.hits < structure.hitsMax &&
+                    structure.structureType === STRUCTURE_WALL &&
+                    structure.hits < Memory.rapartAndWallHits
+                )
+            }
+        });
+        if (allWalls.length) {
+            return allWalls;
+        }
+
+        // what is the min ?
+        
+        Memory.rapartAndWallHits += 1000;
+        return null;
     },
     getRoadsToRepair: function(creep: Creep) {
         const allRoads = creep.room.find(FIND_STRUCTURES, {
             filter: function(structure) {
                 return (
-                    structure.hits < structure.hitsMax &&
-                    structure.structureType === STRUCTURE_WALL &&
-                    structure.hits < Memory.wallHits
+                    (structure.hits < (structure.hitsMax * 0.90)) &&
+                    (structure.structureType === STRUCTURE_ROAD)
                 )
             }
         });
-        return allRoads;
+        if (allRoads.length) {
+            return allRoads;
+        }
+        return null;
     }
 };
 

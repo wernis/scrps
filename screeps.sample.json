@@ -8,8 +8,8 @@
         "branch": "main"
     },
     "pserver": {
-        "email": "username",
-        "password": "Password",
+        "email": "",
+        "password": "",
         "protocol": "http",
         "hostname": "1.2.3.4",
         "port": 21025,

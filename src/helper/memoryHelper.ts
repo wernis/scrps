@@ -8,7 +8,7 @@ const memoryHelper = {
                 delete Memory.creeps[name];
             }
         }
-    }
+    },
 };
 
 // export
